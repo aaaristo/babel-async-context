@@ -6,7 +6,7 @@
   "scripts": {
     "test": "babel test.js > test.out.js; node test.out.js"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "dependencies": {
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.4.0",
