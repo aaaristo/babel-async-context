@@ -48,7 +48,7 @@ const asyncToGenerator = template(`
 
   let sid = 0;
 
-  function _asyncToGenerator(fn, iife) {
+  function _asyncToGenerator(fn) {
     const ctx = { id: ++sid };
 
     return function () {
@@ -77,18 +77,9 @@ const asyncToGenerator = template(`
     all._asyncToGeneratorChildPromises = promises;
     return all;
   }
-
-  function _asyncToGeneratorIIFE(fn) {
-     return _asyncToGenerator(fn, true);
-  }
 `);
 
 const asyncToGeneratorFn = { type: "Identifier", name: "_asyncToGenerator" };
-
-const asyncToGeneratorIIFEFn = {
-  type: "Identifier",
-  name: "_asyncToGeneratorIIFE"
-};
 
 const asyncToGeneratorPromiseAllFn = {
   type: "Identifier",
@@ -99,7 +90,7 @@ module.exports = function(api) {
   const t = api.types;
 
   return {
-    name: "transform-async-domain",
+    name: "transform-async-context",
     visitor: {
       Program: (path, state) => {
         path.unshiftContainer("body", asyncToGenerator());
@@ -115,7 +106,7 @@ module.exports = function(api) {
         if (path.node.async) {
           path.node.async = false;
           path.node.generator = true;
-          wrapFunction(path, t.cloneNode(asyncToGeneratorIIFEFn));
+          wrapFunction(path, t.cloneNode(asyncToGeneratorFn));
         }
       },
       AwaitExpression: path => {
