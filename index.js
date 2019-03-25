@@ -122,14 +122,15 @@ module.exports = function(api) {
         path.replaceWith(t.yieldExpression(argument.node));
       },
       CallExpression: path => {
+        const parent = path.findParent(path => path.isFunctionDeclaration());
+
         if (
           path.node.callee &&
           path.node.callee.object &&
           path.node.callee.property &&
           path.node.callee.object.name === "Promise" &&
           path.node.callee.property.name === "all" &&
-          path.findParent(path => path.isFunctionDeclaration()).node.id.name !==
-            "_asyncToGeneratorPromiseAll"
+          (!parent || parent.node.id.name !== "_asyncToGeneratorPromiseAll")
         ) {
           path.replaceWith(
             t.CallExpression(asyncToGeneratorPromiseAllFn, path.node.arguments)
