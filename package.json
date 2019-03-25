@@ -1,7 +1,7 @@
 {
   "name": "babel-plugin-async-context",
-  "version": "1.0.1",
-  "description": "",
+  "version": "1.0.2",
+  "description": "a ThreadLocal-like lib for js",
   "main": "index.js",
   "scripts": {
     "test": "babel test.js > test.out.js; node test.out.js"
