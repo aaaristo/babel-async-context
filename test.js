@@ -14,7 +14,7 @@ async function foo() {
 }
 
 (async () => {
-  const ctx = await getAsyncContext();
+  const ctx = await getAsyncContext(true);
   ctx.my = "ciao";
   await foo();
 })().catch(x => console.log(x));

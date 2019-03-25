@@ -2,11 +2,11 @@ const template = require("@babel/template").default;
 const wrapFunction = require("@babel/helper-wrap-function").default;
 
 const asyncToGenerator = template(`
-  function* getAsyncContext() {
-      return yield { ctxRequest: true };
+  function* getAsyncContext(entryPoint) {
+      return yield entryPoint ? { ctxRequest: true } : { ctxCallerRequest: true };
   }
 
-  function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg, ctx) {
+  function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg, ctx, p) {
     try {
       var info = gen[key](arg);
       var value = info.value;
@@ -25,6 +25,12 @@ const asyncToGenerator = template(`
       // console.log('qui', info);
       if (info.value.ctxRequest) {
           _next(value.next(ctx).value);
+      } else if (info.value.ctxCallerRequest) {
+        if (p._asyncToGeneratorContext) {
+          _next(value.next(p._asyncToGeneratorContext).value);
+        } else {
+          p.onYield = () => _next(value.next(p._asyncToGeneratorContext).value);
+        }
       }
     } else {
       if (value._asyncToGenerator) {
@@ -50,16 +56,11 @@ const asyncToGenerator = template(`
       const p = new Promise(function (resolve, reject) {
         var gen = fn.apply(self, args);
         function _next(value) {
-          if (!iife && !p._asyncToGeneratorContext) {
-              p.onYield = () => _next(value);
-              return;
-          }
-
           // console.log('get p._asyncToGeneratorContext', p._asyncToGeneratorContext);
-          asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value, p._asyncToGeneratorContext || ctx);
+          asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value, p._asyncToGeneratorContext || ctx, p);
         }
         function _throw(err) {
-          asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err, p._asyncToGeneratorContext || ctx);
+          asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err, p._asyncToGeneratorContext || ctx, p);
         }
 
         setTimeout(() => _next(undefined));
